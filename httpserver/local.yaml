@@ -1,0 +1,25 @@
+env:
+
+adminToken:
+
+sessionStorage:
+  host:
+  port:
+
+sqlStorage:
+  host:
+  port:
+  user:
+  password:
+  dbname:
+  sslmode: disable
+
+log:
+  level: debug
+  handler: text  # json | text
+
+httpServer:
+  host:
+  port:
+  timeout: 4s
+  idle_timeout: 60s

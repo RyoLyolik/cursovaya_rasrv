@@ -1,0 +1,4 @@
+services:
+  brick_monitoring:
+    build: .
+    container_name: brick_monitoring

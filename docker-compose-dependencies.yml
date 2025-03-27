@@ -1,0 +1,27 @@
+networks:
+  brick_net:
+    name: ${NETWORK}
+    driver: bridge
+services:
+  redis:
+    image: redis:7.4.0
+    container_name: brick_redis__${ENVIRONMENT}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+    networks:
+      - brick_net
+    ports:
+      - ${REDIS_PORT}:6379
+
+  pg_db:
+    image: postgres
+    container_name: brick_pg__${ENVIRONMENT}
+    environment:
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_DBNAME=${PG_DBNAME}
+    networks:
+      - brick_net
+    ports:
+      - ${PG_PORT}:5432
