@@ -54,8 +54,14 @@ func (a *Application) Shutdown(ctx context.Context) error {
 
 	a.Log.Info("Closing postgres connection")
 	if err := a.Postgre.Close(); err != nil {
-		return fmt.Errorf("%v", err)
+		return err
 	}
+
+	a.Log.Info("Closing redis")
+	if err := a.SessionStorage.Close(); err != nil {
+		return err
+	}
+
 	a.Log.Info("Application stopped successfully")
 	return nil
 }
