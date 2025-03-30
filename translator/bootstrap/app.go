@@ -38,11 +38,26 @@ func App(envFile *string) (Application, error) {
 		return *app, err
 	}
 	app.Postgre = postgre
-	app.WS, err = Connect(context.Background(), app.Config.WS)
+	app.WS, err = WSConnect(context.Background(), app.Config.WS)
 	if err != nil {
 		return *app, err
 	}
 	return *app, nil
+}
+
+func (a *Application) WSReconnect(ctx context.Context) error {
+	if a.WS != nil {
+		err := a.WS.Close()
+		if err != nil {
+			return err
+		}
+	}
+	var err error
+	a.WS, err = WSConnect(ctx, a.Config.WS)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *Application) Shutdown(ctx context.Context) error {

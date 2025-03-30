@@ -39,12 +39,8 @@ func runApp(ctx context.Context, app *bootstrap.Application) {
 			_, message, err := app.WS.ReadMessage()
 			if err != nil {
 				log.Error("read error, trying to reconnect", "err", err)
-				if err := app.WS.Close(); err != nil {
-					log.Error("failed to close connection", "err", err)
-				}
-				app.WS, err = bootstrap.Connect(ctx, app.Config.WS)
-				if err != nil {
-					log.Error("failed to reconnect", "err", err)
+				if err := app.WSReconnect(ctx); err != nil {
+					log.Error("failed to reccontect", "err", err)
 				}
 				continue
 			}

@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func Connect(ctx context.Context, wsCfg Websocket) (*websocket.Conn, error) {
+func WSConnect(ctx context.Context, wsCfg Websocket) (*websocket.Conn, error) {
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 	address := fmt.Sprintf("%s:%s", wsCfg.Host, wsCfg.Port)
