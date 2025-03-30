@@ -1,0 +1,17 @@
+sqlStorage:
+  host:
+  port:
+  user:
+  password:
+  dbname:
+  sslmode: disable
+
+log:
+  level: debug
+  handler: text  # json | text
+
+ws:
+  host: producer
+  port: 2113
+  scheme: ws
+  path:

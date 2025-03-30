@@ -1,4 +1,43 @@
+networks:
+  brick_net:
+    name: ${NETWORK}
+    driver: bridge
+
 services:
-  brick_monitoring:
-    build: .
-    container_name: brick_monitoring
+  httpserver:
+    build:
+      context: httpserver
+      dockerfile: ./Dockerfile
+    container_name: httpserver_${APP_NAME}__${ENVIRONMENT}
+    env_file:
+      - ${ENV_FILE}
+    ports:
+      - ${HTTP_PORT}:8080
+    networks:
+      - brick_net
+
+  translator:
+    build:
+      context: translator
+      dockerfile: ./Dockerfile
+    container_name: translator_${APP_NAME}__${ENVIRONMENT}
+    env_file:
+      - ${ENV_FILE}
+    ports:
+      - ${TRANSLATOR_PORT}:2112
+    networks:
+      - brick_net
+    depends_on:
+      - producer
+
+  producer:
+    build:
+      context: producer
+      dockerfile: Dockerfile
+    container_name: producer_${APP_NAME}__${ENVIRONMENT}
+    env_file:
+      - ${ENV_FILE}
+    networks:
+      - brick_net
+    ports:
+      - 2113:2113

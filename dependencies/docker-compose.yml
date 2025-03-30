@@ -1,0 +1,52 @@
+networks:
+  brick_net:
+    name: ${NETWORK}
+    driver: bridge
+
+services:
+  redis:
+    image: redis:7.4.0
+    container_name: redis_${APP_NAME}__${ENVIRONMENT}
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+    ports:
+      - ${REDIS_PORT}:6379
+    networks:
+      - brick_net
+
+  postgres:
+    image: postgres
+    container_name: postgres_${APP_NAME}__${ENVIRONMENT}
+    environment:
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_DB=${PG_DBNAME}
+    ports:
+      - ${PG_PORT}:5432
+    networks:
+      - brick_net
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana_${APP_NAME}__${ENVIRONMENT}
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - brick_net
+
+  adminer:
+    image: adminer
+    container_name: adminer_${APP_NAME}__${ENVIRONMENT}
+    restart: always
+    ports:
+      - 7777:8080
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+    networks:
+      - brick_net
+volumes:
+  grafana_data:

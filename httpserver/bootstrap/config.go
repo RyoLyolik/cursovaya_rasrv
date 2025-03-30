@@ -29,8 +29,8 @@ type LoggerConfig struct {
 }
 
 type HTTPServer struct {
-	Host        string        `yaml:"host" env:"HOST" env-required:"true"`
-	Port        int           `yaml:"port" env:"PORT" env-required:"true"`
+	Host        string        `yaml:"host" env:"HTTP_HOST" env-required:"true"`
+	Port        int           `yaml:"port" env:"HTTP_PORT" env-required:"true"`
 	TimeOut     time.Duration `yaml:"timeout"`
 	IdleTimeout time.Duration `yaml:"idle_timeout"`
 }
@@ -45,10 +45,12 @@ type Config struct {
 }
 
 func MustLoad(envFile *string) *Config {
-	godotenv.Load(*envFile)
+	if envFile != nil {
+		godotenv.Load(*envFile)
+	}
 	configPath := os.Getenv("config_file")
 	if configPath == "" {
-		configPath = "./config/local.yaml"
+		configPath = "./local.yaml"
 	}
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		log.Fatalf("config gile does not exist: %s", configPath)

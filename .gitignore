@@ -1,2 +1,4 @@
 httpserver/brick-monitoring
+translator/translator
 *.venv
+__pycache__

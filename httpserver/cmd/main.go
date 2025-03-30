@@ -18,18 +18,12 @@ import (
 func main() {
 	envFile := flag.String("env-file", "", "Path to environment file")
 	flag.Parse()
-	if *envFile == "" {
-		fmt.Println("error: --env-file argument is required")
-		flag.Usage()
-		os.Exit(1)
-	}
 	app, err := bootstrap.App(envFile)
 	if err != nil {
-		fmt.Printf("error configuring app%v", err)
+		fmt.Printf("error configuring app %v", err)
 		os.Exit(1)
 	}
 
-	// route.Setup()
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	runApp(ctx, &app)
