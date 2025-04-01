@@ -40,4 +40,5 @@ func NewAdminRouter(log *slog.Logger, group *gin.RouterGroup, db *sql.DB, sessio
 		AccountUsecase: usecase.NewAccountUsecase(ur, sr, timeout),
 	}
 	group.POST("/account", ac.NewEmployee)
+	group.GET("/account/list", ac.List)
 }

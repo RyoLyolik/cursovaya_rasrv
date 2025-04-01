@@ -1,0 +1,126 @@
+[project]
+
+name="rodnik"
+version = "0.1.0"
+dependencies = [
+    "fastapi[standard]>=0.115.6",
+    "alembic>=1.14.0",
+    "asyncpg>=0.30.0",
+    "passlib[bcrypt]>=1.7.4",
+    "pyjwt>=2.10.1",
+    "uvicorn>=0.32.1",
+    "pydantic-settings>=2.6.1",
+    "orjson>=3.10.12",
+    "aiosmtplib>=3.0.2",
+    "celery>=5.4.0",
+    "redis>=5.2.1",
+    "mongoengine>=0.29.1",
+    "factory-boy>=3.3.1",
+    "minio>=7.2.15",
+]
+requires-python = "==3.12.*"
+
+
+[tool.pytest.ini_options]
+
+env_files = [
+    '.env.test'
+]
+filterwarnings = "ignore: 'crypt' is deprecated and slated for removal in Python 3.13"
+pythonpath = ["."]
+testpaths=[
+    "tests"
+]
+
+
+[tool.ruff]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+line-length = 120
+indent-width = 4
+
+# Assume Python 3.12
+target-version = "py312"
+
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "E",
+    "F",
+    "I",
+    "W",
+]
+ignore = [
+    # "E203",  # Does not matches with pep8 https://peps.python.org/pep-0008/#pet-peeves
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+
+[tool.ruff.format]
+
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+
+[tool.ruff.lint.isort]
+
+section-order = ["future", "standard-library", "first-party", "third-party", "local-folder"]
+lines-between-types=1
+lines-after-imports = 2
+
+known-first-party = [""]
+known-local-folder = ["src"]
+known-third-party = [""]
+
+order-by-type = true
+
+
+[dependency-groups]
+
+dev = [
+    "ruff>=0.9.5",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-mock>=3.14.0",
+    "pytest-cov>=6.0.0",
+    "pytest-dotenv>=0.5.2",
+    "freezegun>=1.5.1",
+]

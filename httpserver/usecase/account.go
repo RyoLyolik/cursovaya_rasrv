@@ -39,3 +39,9 @@ func (au *accountUsecase) Create(ctx context.Context, user *domain.User) error {
 	defer cancel()
 	return au.userRepository.Create(ctx, user)
 }
+
+func (au *accountUsecase) List(ctx context.Context) ([]*domain.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, au.contextTimeout)
+	defer cancel()
+	return au.userRepository.List(ctx)
+}

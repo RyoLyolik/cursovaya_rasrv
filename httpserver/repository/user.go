@@ -95,3 +95,31 @@ func (ur *userRepository) Create(ctx context.Context, user *domain.User) error {
 	}
 	return nil
 }
+
+func (ur *userRepository) List(ctx context.Context) ([]*domain.User, error) {
+	query := `
+	SELECT users.user_id, users.role_id, users.email, users.passwd, users.creation_date, user_roles.title
+	FROM users JOIN user_roles ON user_roles.role_id=users.role_id;
+	`
+	rows, err := ur.database.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	var users []*domain.User
+	for rows.Next() {
+		var user domain.User
+		err := rows.Scan(
+			&user.ID,
+			&user.Role.ID,
+			&user.Email,
+			&user.Password,
+			&user.CreationDate,
+			&user.Role.Name,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+	return users, nil
+}

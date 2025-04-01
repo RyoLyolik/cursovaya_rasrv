@@ -45,6 +45,6 @@ func (lc *LoginController) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	ctx.SetCookie("brick-session-id", sessionID, lc.Expiration, "*", "*", true, true)
+	ctx.SetCookie("brick-session-id", sessionID, lc.Expiration, "*", "", false, true) // todo change false to true (secure option)
 	ctx.JSON(http.StatusOK, domain.OkResp)
 }

@@ -38,7 +38,9 @@ func (ac *AccountController) Me(ctx *gin.Context) {
 
 func (ac *AccountController) NewAdmin(ctx *gin.Context) {
 	var request domain.CreateAdminRequest
+	ac.Logger.Info("Incoming request", "ctx", ctx)
 	err := ctx.ShouldBind(&request)
+	ac.Logger.Info("Binded", "req", request)
 	if err != nil {
 		resp := domain.ErrResp
 		resp.Error.Detail = err.Error()
@@ -72,7 +74,7 @@ func (ac *AccountController) NewAdmin(ctx *gin.Context) {
 	if err != nil {
 		resp := domain.ErrResp
 		resp.Error.Detail = "Failed to create user"
-		ctx.JSON(http.StatusBadRequest, resp)
+		ctx.JSON(http.StatusConflict, resp)
 		return
 	}
 	ctx.JSON(http.StatusCreated, domain.OkResp)
@@ -80,7 +82,14 @@ func (ac *AccountController) NewAdmin(ctx *gin.Context) {
 
 func (ac *AccountController) NewEmployee(ctx *gin.Context) {
 	var request domain.CreateEmployeeRequest
-	ctx.ShouldBind(&request)
+	err := ctx.ShouldBind(&request)
+	ac.Logger.Info("Binded", "req", request)
+	if err != nil {
+		resp := domain.ErrResp
+		resp.Error.Detail = "Bad request"
+		ctx.JSON(http.StatusBadRequest, resp)
+		return
+	}
 	hashedPasswd, err := bcrypt.GenerateFromPassword(
 		[]byte(request.Password),
 		bcrypt.DefaultCost,
@@ -105,4 +114,26 @@ func (ac *AccountController) NewEmployee(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusCreated, domain.OkResp)
+}
+
+func (ac *AccountController) List(ctx *gin.Context) {
+	users, err := ac.AccountUsecase.List(ctx)
+	if err != nil {
+		resp := domain.ErrResp
+		resp.Error.Detail = "Failed to load users"
+		ctx.JSON(http.StatusInternalServerError, resp)
+	}
+	var resp domain.ListUsersResponse
+	resp.Status = "Ok"
+	for _, user := range users {
+		var respUser domain.UserOut
+		respUser.ID = user.ID
+		respUser.Email = user.Email
+		respUser.CreationDate = user.CreationDate
+		respUser.Role = domain.RoleOut{
+			Name: user.Role.Name,
+		}
+		resp.Data = append(resp.Data, respUser)
+	}
+	ctx.JSON(http.StatusOK, resp)
 }

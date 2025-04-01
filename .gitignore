@@ -1,4 +1,15 @@
 httpserver/brick-monitoring
 translator/translator
 *.venv
-__pycache__
+*__pycache__
+.env.dev
+.env.prod
+requirements.txt
+redis.conf
+build
+.pytest_cache
+*.egg-info
+uv.lock
+.ruff_cache
+.coverage
+.vscode

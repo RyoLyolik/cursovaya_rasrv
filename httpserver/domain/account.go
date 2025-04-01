@@ -27,7 +27,20 @@ type CreateAdminRequest struct {
 	Token    string `json:"token" binding:"required"`
 }
 
+type UserOut struct {
+	ID           int       `json:"id"`
+	Email        string    `json:"email"`
+	CreationDate time.Time `json:"creation_date" binding:"datetime"`
+	Role         RoleOut   `json:"role"`
+}
+
+type ListUsersResponse struct {
+	DefaultResponse
+	Data []UserOut `json:"data"`
+}
+
 type AccountUsecase interface {
 	AccountBySession(ctx context.Context, session string) (*User, error)
 	Create(ctx context.Context, user *User) error
+	List(ctx context.Context) ([]*User, error)
 }

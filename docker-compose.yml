@@ -41,3 +41,16 @@ services:
       - brick_net
     ports:
       - 2113:2113
+
+  reports:
+    build:
+      context: reports
+      dockerfile: Dockerfile
+    container_name: reports_${APP_NAME}__${ENVIRONMENT}
+    env_file:
+      - ${ENV_FILE}
+    networks:
+      - brick_net
+    ports:
+      - 9999:9999
+    command: 'uv run python src/run.py'

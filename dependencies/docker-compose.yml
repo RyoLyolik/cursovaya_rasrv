@@ -48,5 +48,14 @@ services:
       - ADMINER_DEFAULT_SERVER=postgres
     networks:
       - brick_net
+  
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio_${APP_NAME}__${ENVIRONMENT}
+    restart: always
+    ports:
+      - 9000:9000
+      - 9001:9001
+    command: server /data --console-address ":9001"
 volumes:
   grafana_data:
