@@ -6,6 +6,23 @@ import Navigation from "@/components/Navigation";
 
 Chart.register(...registerables);
 
+// Желаемые значения температуры для каждой позиции (1-46)
+const DESIRE_VALUES = [
+  50, 60, 75, 100,     // 1-4
+  125, 160, 200, 250,   // 5-8
+  310, 400, 490, 570,   // 9-12
+  630, 690, 740, 770,   // 13-16
+  795, 815, 840, 855,   // 17-20
+  870, 890, 910, 925,   // 21-24
+  930, 940, 937, 930,   // 25-28
+  915, 910, 890, 875,   // 29-32
+  860, 845, 830, 800,   // 33-36
+  760, 730, 650, 425,   // 37-40
+  300, 225, 150, 120,   // 41-44
+  80, 60                // 45-46
+];
+const DEVIATION = 0.995
+
 interface MonitoringData {
   timestamp: string;
   record_id: number;
@@ -18,13 +35,23 @@ interface PositionData {
   [key: number]: MonitoringData | null;
 }
 
+interface Alert {
+  id: number;
+  pos_id: number;
+  currentValue: number;
+  desiredValue: number;
+  deviation: number;
+  percentDeviation: number;
+}
+
 export default function MonitoringPage() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [tempData, setTempData] = useState<PositionData>({});
+  const [readData, setReadData] = useState<PositionData>({});
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const nextAlertId = useRef(1);
   
-  const tempChartRef = useRef<Chart | null>(null);
-  
-  const tempCanvasRef = useRef<HTMLCanvasElement>(null);
+  const dataChartRef = useRef<Chart | null>(null);
+  const dataCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Инициализация пустых данных для всех позиций
   const initializeData = () => {
@@ -32,7 +59,32 @@ export default function MonitoringPage() {
     for (let i = 1; i <= 46; i++) {
       emptyData[i] = null;
     }
-    setTempData({...emptyData});
+    setReadData({...emptyData});
+  };
+
+  // Проверка отклонений температуры
+  const checkDeviation = (pos_id: number, currentValue: number) => {
+    const desiredValue = DESIRE_VALUES[pos_id - 1];
+    const deviation = currentValue - desiredValue;
+    const percentDeviation = (Math.abs(deviation) / desiredValue) * 100;
+    // Если отклонение больше 15%
+    if (percentDeviation > DEVIATION) {
+      const newAlert = {
+        id: nextAlertId.current++,
+        pos_id,
+        currentValue,
+        desiredValue,
+        deviation,
+        percentDeviation
+      };
+      
+      setAlerts(prev => [...prev, newAlert]);
+    }
+  };
+
+  // Закрытие уведомления
+  const closeAlert = (id: number) => {
+    setAlerts(prev => prev.filter(alert => alert.id !== id));
   };
 
   // Инициализация графиков
@@ -110,8 +162,8 @@ export default function MonitoringPage() {
     initializeData();
 
     // Инициализация графиков
-    if (tempCanvasRef.current) {
-      initChart(tempCanvasRef, tempChartRef, 'Значения температуры', 'rgba(255, 99, 132, 0.2)', 46);
+    if (dataCanvasRef.current) {
+      initChart(dataCanvasRef, dataChartRef, 'Значения температуры', 'rgba(255, 99, 132, 0.2)', 46);
     }
 
     // Подключение к WebSocket
@@ -122,20 +174,21 @@ export default function MonitoringPage() {
       const data: MonitoringData = JSON.parse(event.data);
       
       // Обновляем данные в соответствии с типом
-      switch(data.record_type) {
-        case 'temperature':
-          setTempData(prev => {
-            const newData = {...prev, [data.pos_id]: data};
-            updateChart(tempChartRef, newData);
-            return newData;
-          });
-          break;
+      if (data.record_type === 'temperature') {
+        setReadData(prev => {
+          const newData = {...prev, [data.pos_id]: data};
+          updateChart(dataChartRef, newData);
+          
+          // Проверяем отклонение температуры
+          checkDeviation(data.pos_id, data.value);
+          return newData;
+        });
       }
     };
 
     return () => {
       ws.close();
-      if (tempChartRef.current) tempChartRef.current.destroy();
+      if (dataChartRef.current) dataChartRef.current.destroy();
     };
   }, []);
 
@@ -155,15 +208,30 @@ export default function MonitoringPage() {
             <tr className="bg-gray-100">
               <th className="py-2 px-4 border">Позиция</th>
               <th className="py-2 px-4 border">Значение</th>
+              <th className="py-2 px-4 border">Желаемое</th>
+              <th className="py-2 px-4 border">Отклонение</th>
               <th className="py-2 px-4 border">Время</th>
             </tr>
           </thead>
           <tbody>
             {Array.from({length: leng}, (_, i) => i + 1).map(pos => (
-              <tr key={pos} className="hover:bg-gray-50">
+              <tr key={pos} className={`hover:bg-gray-50 ${
+                readData[pos]?.value && 
+                Math.abs((readData[pos]?.value! - DESIRE_VALUES[pos-1]) / DESIRE_VALUES[pos-1]) > DEVIATION/100
+                  ? 'bg-red-50' 
+                  : ''
+              }`}>
                 <td className="py-2 px-4 border text-center">{pos}</td>
                 <td className="py-2 px-4 border text-center">
-                  {data[pos]?.value.toFixed(4) || '-'}
+                  {data[pos]?.value.toFixed(1) || '-'}
+                </td>
+                <td className="py-2 px-4 border text-center">
+                  {DESIRE_VALUES[pos-1]}
+                </td>
+                <td className="py-2 px-4 border text-center">
+                  {data[pos]?.value 
+                    ? `${((data[pos]?.value! - DESIRE_VALUES[pos-1]) / DESIRE_VALUES[pos-1] * 100).toFixed(1)}%` 
+                    : '-'}
                 </td>
                 <td className="py-2 px-4 border text-center">
                   {formatDate(data[pos]?.timestamp)}
@@ -181,18 +249,41 @@ export default function MonitoringPage() {
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
+        {/* Уведомления об отклонениях */}
+        <div className="fixed top-4 right-4 space-y-2 z-50">
+          {alerts.map(alert => (
+            <div key={alert.id} className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg max-w-xs">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-bold">Отклонение от кривой обжига!</p>
+                  <p className="text-sm">Позиция: {alert.pos_id}</p>
+                  <p className="text-sm">Текущая: {alert.currentValue.toFixed(1)}</p>
+                  <p className="text-sm">Желаемая: {alert.desiredValue}</p>
+                  <p className="text-sm">Отклонение: {alert.deviation.toFixed(1)} ({alert.percentDeviation.toFixed(1)}%)</p>
+                </div>
+                <button 
+                  onClick={() => closeAlert(alert.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <h1 className="text-2xl font-bold mb-6">Параметры температуры в печи</h1>
         
         {/* Графики */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="gap-6 mb-8">
           <div className="bg-white p-4 rounded-lg shadow">
-            <canvas ref={tempCanvasRef} height="300"></canvas>
+            <canvas ref={dataCanvasRef} height="100"></canvas>
           </div>
         </div>
 
         {/* Таблицы данных */}
         <div className="space-y-8">
-          <DataTable title="Таблица параметров" data={tempData} leng={46} />
+          <DataTable title="Таблица параметров" data={readData} leng={46} />
         </div>
       </div>
     </div>

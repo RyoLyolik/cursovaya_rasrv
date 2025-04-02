@@ -28,7 +28,7 @@ export default function MonitoringSelectionPage() {
                         {monitoringOptions.map((option) => (
                             <Link
                                 key={option.id}
-                                href={`/realtime/${option.id}`}
+                                href={`/monitoring/realtime/${option.id}`}
                                 className={`${option.color} ${option.textColor} rounded-xl shadow-md p-8 transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex flex-col items-center`}
                             >
                                 <div className="text-4xl mb-4">
@@ -59,7 +59,7 @@ export default function MonitoringSelectionPage() {
                         {monitoringOptions.map((option) => (
                             <Link
                                 key={option.id}
-                                href={`/search/${option.id}`}
+                                href={`/monitoring/search/${option.id}`}
                                 className={`${option.color} ${option.textColor} rounded-xl shadow-md p-8 transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex flex-col items-center`}
                             >
                                 <div className="text-4xl mb-4">

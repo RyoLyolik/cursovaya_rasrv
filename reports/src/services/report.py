@@ -1,4 +1,6 @@
 
+import os
+
 from uuid import uuid4
 
 from repositories.data import DataRepository
@@ -66,11 +68,11 @@ class ReportService:
             target=[0] * 10,
             size=10
         )
-        print(temp_data)
         ts = req.timefrom.strftime('%d-%m-%Y')
         te = req.timeto.strftime('%d-%m-%Y')
-        filename = f'отчет.{ts} — {te}.{uuid4()}.pdf'
-        with PdfPages('ОТЧЕТ.pdf') as pdf:
+        object_name = f'отчет.{ts} — {te}.{uuid4()}.pdf'
+        filename = object_name
+        with PdfPages(filename) as pdf:
             # Первая страница с заголовком
             plt.figure(figsize=(8, 6))
             plt.axis('off')
@@ -137,6 +139,7 @@ class ReportService:
                 values = fdata[1]
                 plt.figure(figsize=(10, 6))
                 plt.xlim((req.timefrom, req.timeto))
+                plt.ylim((0, 100))
                 plt.plot(dates, values, marker='o', linestyle='-', color='b')
                 plt.title(f'Значения в позиции {i + 1}', fontsize=16)
                 plt.xlabel('Время', fontsize=12)
@@ -146,22 +149,31 @@ class ReportService:
                 plt.tight_layout()
                 pdf.savefig()
                 plt.close()
-
-        # os.remove(filename)
+        self.report_repo.fadd(filename, object_name)
+        try:
+            os.remove(filename)
+        except Exception:
+            print("failed to remove file")
 
     async def fill_data(self, tablename, grouping, timefrom, timeto, target, size=46):
-        to_fill = {i: [[], [], target[i - 1]] for i in range(1, size+1)}
+        to_fill = {i: [[], [], target[i - 1]] for i in range(1, size + 1)}
         for position in to_fill:
             result = await self.data_repo.get_min_max_grouped(tablename, grouping, timefrom, timeto, position, target[position - 1])
             for record in result:
                 to_fill[position][0].append(record.timestamp)
                 to_fill[position][1].append(record.value)
         return to_fill
-    def add(self):
-        ...
 
-    def get(self, id):
-        ...
+    def get(self, object_name):
+        return self.report_repo.get(object_name)
 
     def list(self):
-        ...
+        res = self.report_repo.list()
+        ans = []
+        for obj in res:
+            ans.append({
+                'filename': obj.object_name,
+                'size': obj.size,
+                'creation_date': obj.last_modified,
+            })
+        return ans

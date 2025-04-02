@@ -19,6 +19,8 @@ dependencies = [
     "minio>=7.2.15",
     "matplotlib>=3.10.1",
     "numpy>=2.2.4",
+    "translit>=0.2a1",
+    "transliterate>=1.10.2",
 ]
 requires-python = "==3.12.*"
 

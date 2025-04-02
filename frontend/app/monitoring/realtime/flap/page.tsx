@@ -20,19 +20,19 @@ interface PositionData {
 
 export default function MonitoringPage() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [pressureData, setpressureData] = useState<PositionData>({});
+  const [flapData, setflapData] = useState<PositionData>({});
   
-  const pressureChartRef = useRef<Chart | null>(null);
+  const flapChartRef = useRef<Chart | null>(null);
   
-  const pressureCanvasRef = useRef<HTMLCanvasElement>(null);
+  const flapCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Инициализация пустых данных для всех позиций
   const initializeData = () => {
     const emptyData: PositionData = {};
-    for (let i = 1; i <= 46; i++) {
+    for (let i = 1; i <= 10; i++) {
       emptyData[i] = null;
     }
-    setpressureData({...emptyData});
+    setflapData({...emptyData});
   };
 
   // Инициализация графиков
@@ -68,7 +68,8 @@ export default function MonitoringPage() {
         responsive: true,
         scales: {
           y: {
-            beginAtZero: false,
+            min: 0,
+            max: 100,
             title: {
               display: true,
               text: 'Значение'
@@ -98,7 +99,7 @@ export default function MonitoringPage() {
   ) => {
     if (!chartRef.current) return;
     
-    const values = Array.from({length: 46}, (_, i) => 
+    const values = Array.from({length: 10}, (_, i) => 
       data[i + 1]?.value || 0
     );
     
@@ -110,8 +111,8 @@ export default function MonitoringPage() {
     initializeData();
 
     // Инициализация графиков
-    if (pressureCanvasRef.current) {
-      initChart(pressureCanvasRef, pressureChartRef, 'Значения давления', 'rgba(255, 99, 132, 0.2)', 46);
+    if (flapCanvasRef.current) {
+      initChart(flapCanvasRef, flapChartRef, 'Значения положения заслонок', 'rgba(255, 99, 132, 0.2)', 10);
     }
 
     // Подключение к WebSocket
@@ -123,10 +124,10 @@ export default function MonitoringPage() {
       
       // Обновляем данные в соответствии с типом
       switch(data.record_type) {
-        case 'pressure':
-          setpressureData(prev => {
+        case 'flap':
+          setflapData(prev => {
             const newData = {...prev, [data.pos_id]: data};
-            updateChart(pressureChartRef, newData);
+            updateChart(flapChartRef, newData);
             return newData;
           });
           break;
@@ -135,7 +136,7 @@ export default function MonitoringPage() {
 
     return () => {
       ws.close();
-      if (pressureChartRef.current) pressureChartRef.current.destroy();
+      if (flapChartRef.current) flapChartRef.current.destroy();
     };
   }, []);
 
@@ -181,18 +182,18 @@ export default function MonitoringPage() {
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Параметры давления в печи</h1>
+        <h1 className="text-2xl font-bold mb-6">Положение заслонок в печи</h1>
         
         {/* Графики */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="gap-6 mb-8">
           <div className="bg-white p-4 rounded-lg shadow">
-            <canvas ref={pressureCanvasRef} height="300"></canvas>
+            <canvas ref={flapCanvasRef} height="100"></canvas>
           </div>
         </div>
 
         {/* Таблицы данных */}
         <div className="space-y-8">
-          <DataTable title="Таблица параметров" data={pressureData} leng={46} />
+          <DataTable title="Таблица параметров" data={flapData} leng={10} />
         </div>
       </div>
     </div>

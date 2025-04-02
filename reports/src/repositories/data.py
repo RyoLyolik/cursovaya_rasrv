@@ -58,46 +58,55 @@ class DataRepository:
 
     async def get_min_max_grouped(self, tablename, grouping, timefrom, timeto, position, target) -> list[FoundData]:
         query = f'''
-WITH hourly_peaks AS (
+WITH deviations AS (
     SELECT
-        DATE_TRUNC('{grouping}', timestamp) AS timeunit,
+        timestamp,
         position,
-        MAX(ABS(value-{target})) AS peak_value
+        value,
+        ABS(value - {target}) AS deviation,  -- Вычисляем отклонение от target
+        DATE_TRUNC('{grouping}', timestamp) AS hour_start
     FROM
         {tablename}
     WHERE
+        position={position} AND
         timestamp BETWEEN '{timefrom}' AND '{timeto}'
-        AND position = {position}
+),
+max_deviations AS (
+    SELECT
+        hour_start,
+        position,
+        MAX(deviation) AS max_deviation
+    FROM
+        deviations
     GROUP BY
-        DATE_TRUNC('{grouping}', timestamp),
+        hour_start,
         position
 )
 SELECT
-    hp.timeunit,
-    hp.position,
-    hp.peak_value,
-    t.timestamp AS peak_time
+    d.timestamp AS peak_time,
+    d.hour_start,
+    d.position,
+    d.value,
+    d.deviation
 FROM
-    hourly_peaks hp
+    deviations d
 JOIN
-    {tablename} t
-    ON DATE_TRUNC('{grouping}', t.timestamp) = hp.timeunit
-    AND t.position = hp.position
-    AND (t.value = hp.peak_value + {target} OR t.value=hp.peak_value - {target})
+    max_deviations md
+    ON d.hour_start = md.hour_start
+    AND d.position = md.position
+    AND d.deviation = md.max_deviation
 ORDER BY
-    hp.timeunit,
-    hp.position;
+    d.hour_start,
+    d.position;
 '''
         result = await self.session.execute(text(query))
         rows = result.all()
         ans = []
         for row in rows:
             fdata = FoundData.model_construct(
-                timestamp=row[3],
-                position=row[1],
-                value=row[2],
+                timestamp=row[0],
+                position=row[2],
+                value=row[3],
             )
             ans.append(fdata)
-        if not ans:
-            print(query)
         return ans
