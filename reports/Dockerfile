@@ -22,10 +22,10 @@ ENV PYTHONOPTIMIZE=1 \
     UV_PROJECT_ENVIRONMENT=${PYTHONPATH}/.venv \
     UV_PYTHON_DOWNLOADS=never
 
-WORKDIR ${PYTHONPATH}
+WORKDIR ${PYTHONPATH}/../
 
 RUN python3 -m venv .venv
-RUN . ${PYTHONPATH}/.venv/bin/activate
+RUN . ${PYTHONPATH}/../.venv/bin/activate
 
 # Копируем утилиту `uv` из официального Docker-образа.
 # https://github.com/astral-sh/uv/pkgs/container/uv

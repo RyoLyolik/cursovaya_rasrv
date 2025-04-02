@@ -54,3 +54,6 @@ services:
     ports:
       - 9999:9999
     command: 'uv run python src/run.py'
+    volumes:
+      - ./reports:/usr/prj:ro
+    restart: always

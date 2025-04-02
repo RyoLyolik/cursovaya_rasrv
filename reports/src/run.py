@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 
-from src.providers.db import get_async_engine
+from providers.db import get_async_engine
 
 
 @asynccontextmanager
@@ -51,7 +51,7 @@ def create_app() -> FastAPI:
 app = create_app()
 
 if __name__ == '__main__':
-    from src.core.config import settings
+    from core.config import settings
 
     logging.basicConfig(format=settings.logging.log_format)
     uvicorn.run(
