@@ -80,22 +80,24 @@ SELECT
 FROM
     hourly_peaks hp
 JOIN
-    temperature t
+    {tablename} t
     ON DATE_TRUNC('{grouping}', t.timestamp) = hp.timeunit
     AND t.position = hp.position
-    AND t.value = hp.peak_value
+    AND (t.value = hp.peak_value + {target} OR t.value=hp.peak_value - {target})
 ORDER BY
     hp.timeunit,
     hp.position;
 '''
         result = await self.session.execute(text(query))
         rows = result.all()
-        result = []
+        ans = []
         for row in rows:
             fdata = FoundData.model_construct(
                 timestamp=row[3],
                 position=row[1],
                 value=row[2],
             )
-            result.append(fdata)
-        return result
+            ans.append(fdata)
+        if not ans:
+            print(query)
+        return ans

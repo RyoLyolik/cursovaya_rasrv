@@ -45,32 +45,28 @@ class ReportService:
             5.8, 5.8,  # 46
         ]
         temp_data = {i: [[], [], tsp[i - 1]] for i in range(1, 47)}
-        await self.fill_data(
-            tablename='temperature',
-            grouping=req.grouping,
-            timefrom=req.timefrom,
-            timeto=req.timeto,
-            to_fill=temp_data,
-            target=tsp
-        )
-        press_data = {i: [[], [], psp[i - 1]] for i in range(1, 47)}
-        await self.fill_data(
+        for position in temp_data:
+            result = await self.data_repo.get_min_max_grouped('temperature', req.grouping, req.timefrom, req.timeto, position, tsp[position - 1])
+            for record in result:
+                temp_data[position][0].append(record.timestamp)
+                temp_data[position][1].append(record.value)
+        press_data = await self.fill_data(
             tablename='pressure',
             grouping=req.grouping,
             timefrom=req.timefrom,
             timeto=req.timeto,
-            to_fill=press_data,
             target=psp,
+            size=46
         )
-        flap_data = {i: [[], []] for i in range(1, 11)}
-        await self.fill_data(
+        flap_data = await self.fill_data(
             tablename='flap',
             grouping=req.grouping,
             timefrom=req.timefrom,
             timeto=req.timeto,
-            to_fill=flap_data,
-            target=[0] * len(flap_data),
+            target=[0] * 10,
+            size=10
         )
+        print(temp_data)
         ts = req.timefrom.strftime('%d-%m-%Y')
         te = req.timeto.strftime('%d-%m-%Y')
         filename = f'отчет.{ts} — {te}.{uuid4()}.pdf'
@@ -153,14 +149,14 @@ class ReportService:
 
         # os.remove(filename)
 
-    async def fill_data(self, tablename, grouping, timefrom, timeto, target, to_fill):
+    async def fill_data(self, tablename, grouping, timefrom, timeto, target, size=46):
+        to_fill = {i: [[], [], target[i - 1]] for i in range(1, size+1)}
         for position in to_fill:
             result = await self.data_repo.get_min_max_grouped(tablename, grouping, timefrom, timeto, position, target[position - 1])
-            print(result)
             for record in result:
                 to_fill[position][0].append(record.timestamp)
                 to_fill[position][1].append(record.value)
-
+        return to_fill
     def add(self):
         ...
 
