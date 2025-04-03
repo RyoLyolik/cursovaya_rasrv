@@ -1,6 +1,7 @@
 
 import os
 
+from datetime import timedelta
 from uuid import uuid4
 
 from repositories.data import DataRepository
@@ -46,12 +47,16 @@ class ReportService:
             5.8, 5.8, 5.8, 5.8,  # 44
             5.8, 5.8,  # 46
         ]
-        temp_data = {i: [[], [], tsp[i - 1]] for i in range(1, 47)}
-        for position in temp_data:
-            result = await self.data_repo.get_min_max_grouped('temperature', req.grouping, req.timefrom, req.timeto, position, tsp[position - 1])
-            for record in result:
-                temp_data[position][0].append(record.timestamp)
-                temp_data[position][1].append(record.value)
+        req.timefrom -= timedelta(hours=3)
+        req.timeto -= timedelta(hours=3)
+        temp_data = await self.fill_data(
+            tablename='temperature',
+            grouping=req.grouping,
+            timefrom=req.timefrom,
+            timeto=req.timeto,
+            target=tsp,
+            size=46
+        )
         press_data = await self.fill_data(
             tablename='pressure',
             grouping=req.grouping,
@@ -68,9 +73,11 @@ class ReportService:
             target=[0] * 10,
             size=10
         )
-        ts = req.timefrom.strftime('%d-%m-%Y')
-        te = req.timeto.strftime('%d-%m-%Y')
-        object_name = f'отчет.{ts} — {te}.{uuid4()}.pdf'
+        req.timefrom += timedelta(hours=3)
+        req.timeto += timedelta(hours=3)
+        ts = req.timefrom.strftime('%d-%m-%Y %H:%M:%S')
+        te = req.timeto.strftime('%d-%m-%Y %H:%M:%S')
+        object_name = f'отчет за {ts} — {te}.{str(uuid4())[:4]}.pdf'
         filename = object_name
         with PdfPages(filename) as pdf:
             # Первая страница с заголовком
@@ -160,7 +167,7 @@ class ReportService:
         for position in to_fill:
             result = await self.data_repo.get_min_max_grouped(tablename, grouping, timefrom, timeto, position, target[position - 1])
             for record in result:
-                to_fill[position][0].append(record.timestamp)
+                to_fill[position][0].append(record.timestamp+timedelta(hours=3))
                 to_fill[position][1].append(record.value)
         return to_fill
 

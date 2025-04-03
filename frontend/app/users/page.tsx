@@ -194,7 +194,7 @@ export default function UsersListPage() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Роль</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата создания</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th> */}
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -204,12 +204,12 @@ export default function UsersListPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{user.role.title.toLowerCase()}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(user.creation_date)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <Link
+                                        {/* <Link
                                             href={`/users/edit/${user.id}`}
                                             className="text-indigo-600 hover:text-indigo-900 mr-4"
                                         >
                                             Редактировать
-                                        </Link>
+                                        </Link> */}
                                     </td>
                                 </tr>
                             ))}

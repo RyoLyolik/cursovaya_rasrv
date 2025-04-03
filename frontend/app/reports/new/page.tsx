@@ -92,7 +92,7 @@ export default function CreateReportPage() {
                 Дата начала
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 id="timefrom"
                 name="timefrom"
                 required
@@ -107,7 +107,7 @@ export default function CreateReportPage() {
                 Дата окончания
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 id="timeto"
                 name="timeto"
                 required

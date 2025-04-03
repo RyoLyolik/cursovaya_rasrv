@@ -21,6 +21,6 @@ def value_generator(
         noise = 2 * noise_level * (random()-0.5)
         anomaly = 0
         if action < anomaly_chance:
-            anomaly = anomaly_size * 2 * sign(random()-0.5)
+            anomaly = anomaly_size * 0.5 * sign(random()-0.5)
         value = set_point + anomaly + noise
         yield value

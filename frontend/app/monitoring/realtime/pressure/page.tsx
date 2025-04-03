@@ -21,7 +21,7 @@ const DESIRE_VALUES = [
   5.8, 5.8, 5.8, 5.8,
   5.8, 5.8,
 ];
-const DEVIATION = 0.995
+const DEVIATION = 5
 
 interface MonitoringData {
   timestamp: string;
@@ -42,6 +42,7 @@ interface Alert {
   desiredValue: number;
   deviation: number;
   percentDeviation: number;
+  timestamp: string;
 }
 
 export default function MonitoringPage() {
@@ -63,7 +64,7 @@ export default function MonitoringPage() {
   };
 
   // Проверка отклонений температуры
-  const checkDeviation = (pos_id: number, currentValue: number) => {
+  const checkDeviation = (pos_id: number, currentValue: number, ts: string) => {
     const desiredValue = DESIRE_VALUES[pos_id - 1];
     const deviation = currentValue - desiredValue;
     const percentDeviation = (Math.abs(deviation) / desiredValue) * 100;
@@ -75,7 +76,8 @@ export default function MonitoringPage() {
         currentValue,
         desiredValue,
         deviation,
-        percentDeviation
+        percentDeviation,
+        timestamp: ts,
       };
       
       setAlerts(prev => [...prev, newAlert]);
@@ -180,7 +182,7 @@ export default function MonitoringPage() {
           updateChart(dataChartRef, newData);
           
           // Проверяем отклонение температуры
-          checkDeviation(data.pos_id, data.value);
+          checkDeviation(data.pos_id, data.value, data.timestamp);
           return newData;
         });
       }
@@ -260,6 +262,7 @@ export default function MonitoringPage() {
                   <p className="text-sm">Текущая: {alert.currentValue.toFixed(1)}</p>
                   <p className="text-sm">Желаемая: {alert.desiredValue}</p>
                   <p className="text-sm">Отклонение: {alert.deviation.toFixed(1)} ({alert.percentDeviation.toFixed(1)}%)</p>
+                  <p className="text-sm">Время: {alert.timestamp}</p>
                 </div>
                 <button 
                   onClick={() => closeAlert(alert.id)}

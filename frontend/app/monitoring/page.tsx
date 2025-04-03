@@ -33,13 +33,13 @@ export default function MonitoringSelectionPage() {
                             >
                                 <div className="text-4xl mb-4">
                                     {option.id === 'temperature' && (
-                                        <span className="text-red-500">🌡️</span>
+                                        <span className="text-red-500">📊</span>
                                     )}
                                     {option.id === 'pressure' && (
                                         <span className="text-blue-500">📊</span>
                                     )}
                                     {option.id === 'flap' && (
-                                        <span className="text-green-500">✈️</span>
+                                        <span className="text-green-500">📊</span>
                                     )}
                                 </div>
                                 <h2 className="text-xl font-semibold mb-2">{option.name}</h2>
@@ -64,13 +64,13 @@ export default function MonitoringSelectionPage() {
                             >
                                 <div className="text-4xl mb-4">
                                     {option.id === 'temperature' && (
-                                        <span className="text-red-500">🌡️</span>
+                                        <span className="text-red-500">📊</span>
                                     )}
                                     {option.id === 'pressure' && (
                                         <span className="text-blue-500">📊</span>
                                     )}
                                     {option.id === 'flap' && (
-                                        <span className="text-green-500">✈️</span>
+                                        <span className="text-green-500">📊</span>
                                     )}
                                 </div>
                                 <h2 className="text-xl font-semibold mb-2">{option.name}</h2>

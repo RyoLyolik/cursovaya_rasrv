@@ -27,6 +27,7 @@ func MakePostgres(log *slog.Logger, psqlConnectionInfo string) (*sql.DB, error) 
 		return nil, fmt.Errorf("%v", err)
 	}
 
+	// CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 	_, err = tx.Exec(`
 	DROP TABLE IF EXISTS users;
 	DROP TABLE IF EXISTS user_roles;
@@ -43,7 +44,10 @@ func MakePostgres(log *slog.Logger, psqlConnectionInfo string) (*sql.DB, error) 
 		creation_date DATE
 	);
 
-	CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+	CREATE INDEX IF NOT EXISTS idx_users_email
+		ON public.users USING HASH
+		(email COLLATE pg_catalog."default")
+		TABLESPACE pg_default;
 
 	INSERT INTO user_roles (role_id, title) VALUES (0, 'admin');
 	INSERT INTO user_roles (role_id, title) VALUES (1, 'employee');

@@ -1,5 +1,4 @@
 
-from typing import BinaryIO
 
 from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +17,6 @@ class ReportRepository:
             object_name=object_name,
             file_path=fp
         )
-        
 
     def get(self, object_name):
         return self.client.get_object(self.bucket, object_name).data

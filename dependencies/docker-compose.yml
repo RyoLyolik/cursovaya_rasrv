@@ -59,5 +59,23 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - brick_net
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_${APP_NAME}__${ENVIRONMENT}
+    environment:
+      - PGADMIN_LISTEN_PORT=5050
+      - PGADMIN_DEFAULT_EMAIL=bichokov0405@yandex.ru
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    networks:
+      - brick_net
+    ports:
+      - 5050:5050
+  dbeaver:
+    image: dbeaver/cloudbeaver
+    container_name: dbeaver_${APP_NAME}__${ENVIRONMENT}
+    ports:
+      - 8978:8978
+    networks:
+      - brick_net
 volumes:
   grafana_data:

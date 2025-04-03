@@ -3,7 +3,7 @@ from typing import Generator
 from value_generator import value_generator
 
 
-ANOMALY_CHANGE = 0.000001
+ANOMALY_CHANGE = 0.001
 
 
 def temperature_generator() -> Generator[dict, None, None]:

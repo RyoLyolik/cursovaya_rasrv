@@ -8,20 +8,20 @@ Chart.register(...registerables);
 
 // Желаемые значения температуры для каждой позиции (1-46)
 const DESIRE_VALUES = [
-  50, 60, 75, 100,     // 1-4
-  125, 160, 200, 250,   // 5-8
-  310, 400, 490, 570,   // 9-12
-  630, 690, 740, 770,   // 13-16
-  795, 815, 840, 855,   // 17-20
-  870, 890, 910, 925,   // 21-24
-  930, 940, 937, 930,   // 25-28
-  915, 910, 890, 875,   // 29-32
-  860, 845, 830, 800,   // 33-36
-  760, 730, 650, 425,   // 37-40
-  300, 225, 150, 120,   // 41-44
-  80, 60                // 45-46
+  50, 60, 75, 100,
+  125, 160, 200, 250,
+  310, 400, 490, 570,
+  630, 690, 740, 770,
+  795, 815, 840, 855,
+  870, 890, 910, 925,
+  930, 940, 937, 930,
+  915, 910, 890, 875,
+  860, 845, 830, 800,
+  760, 730, 650, 425,
+  300, 225, 150, 120,
+  80, 60,
 ];
-const DEVIATION = 0.995
+const DEVIATION = 5
 
 interface MonitoringData {
   timestamp: string;
@@ -42,6 +42,7 @@ interface Alert {
   desiredValue: number;
   deviation: number;
   percentDeviation: number;
+  timestamp: string;
 }
 
 export default function MonitoringPage() {
@@ -63,7 +64,7 @@ export default function MonitoringPage() {
   };
 
   // Проверка отклонений температуры
-  const checkDeviation = (pos_id: number, currentValue: number) => {
+  const checkDeviation = (pos_id: number, currentValue: number, ts: string) => {
     const desiredValue = DESIRE_VALUES[pos_id - 1];
     const deviation = currentValue - desiredValue;
     const percentDeviation = (Math.abs(deviation) / desiredValue) * 100;
@@ -75,7 +76,8 @@ export default function MonitoringPage() {
         currentValue,
         desiredValue,
         deviation,
-        percentDeviation
+        percentDeviation,
+        timestamp: ts,
       };
       
       setAlerts(prev => [...prev, newAlert]);
@@ -180,7 +182,7 @@ export default function MonitoringPage() {
           updateChart(dataChartRef, newData);
           
           // Проверяем отклонение температуры
-          checkDeviation(data.pos_id, data.value);
+          checkDeviation(data.pos_id, data.value, data.timestamp);
           return newData;
         });
       }
@@ -260,6 +262,7 @@ export default function MonitoringPage() {
                   <p className="text-sm">Текущая: {alert.currentValue.toFixed(1)}</p>
                   <p className="text-sm">Желаемая: {alert.desiredValue}</p>
                   <p className="text-sm">Отклонение: {alert.deviation.toFixed(1)} ({alert.percentDeviation.toFixed(1)}%)</p>
+                  <p className="text-sm">Время: {alert.timestamp}</p>
                 </div>
                 <button 
                   onClick={() => closeAlert(alert.id)}

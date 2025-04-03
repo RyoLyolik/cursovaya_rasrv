@@ -26,9 +26,8 @@ export default function ReportsPage() {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get('http://localhost:3377/api/reports/list', {
-        withCredentials: true
-      });
+      const response = await axios.get('http://localhost:3377/api/reports/list');
+      console.log(response.data)
       console.log(response)
       setReports(response.data);
     } catch (err) {
