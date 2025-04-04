@@ -11,10 +11,10 @@ import (
 )
 
 type Application struct {
-	Config  *Config
-	Log     *slog.Logger
-	Postgre *sql.DB
-	WS      *websocket.Conn
+	Config   *Config
+	Log      *slog.Logger
+	Postgre  *sql.DB
+	WSClient *websocket.Conn
 }
 
 func App(envFile *string) (Application, error) {
@@ -38,7 +38,7 @@ func App(envFile *string) (Application, error) {
 		return *app, err
 	}
 	app.Postgre = postgre
-	app.WS, err = WSConnect(context.Background(), app.Config.WS)
+	app.WSClient, err = WSConnect(context.Background(), app.Config.WS)
 	if err != nil {
 		return *app, err
 	}
@@ -46,14 +46,14 @@ func App(envFile *string) (Application, error) {
 }
 
 func (a *Application) WSReconnect(ctx context.Context) error {
-	if a.WS != nil {
-		err := a.WS.Close()
+	if a.WSClient != nil {
+		err := a.WSClient.Close()
 		if err != nil {
 			return err
 		}
 	}
 	var err error
-	a.WS, err = WSConnect(ctx, a.Config.WS)
+	a.WSClient, err = WSConnect(ctx, a.Config.WS)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (a *Application) Shutdown(ctx context.Context) error {
 		return err
 	}
 	a.Log.Info("Closing websocket connection")
-	if err := a.WS.Close(); err != nil {
+	if err := a.WSClient.Close(); err != nil {
 		return err
 	}
 	a.Log.Info("Application stopped successfully")

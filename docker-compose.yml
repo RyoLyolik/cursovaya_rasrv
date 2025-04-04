@@ -25,6 +25,7 @@ services:
       - ${ENV_FILE}
     ports:
       - ${TRANSLATOR_PORT}:2112
+      - 2114:2114
     networks:
       - brick_net
     depends_on:

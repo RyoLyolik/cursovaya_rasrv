@@ -29,7 +29,7 @@ func NewMessageHandler(log *slog.Logger, db *sql.DB) *messageHandler {
 func (mh *messageHandler) HandleMessage(ctx context.Context, message []byte) error {
 	var msg domain.IncomingMessage
 	if err := json.Unmarshal(message, &msg); err != nil {
-		return fmt.Errorf("invalid JSON format: %v", err)
+		return err
 	}
 	record := domain.DefaultRecord{
 		Timestamp: msg.Timestamp,

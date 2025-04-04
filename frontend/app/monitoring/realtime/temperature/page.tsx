@@ -169,7 +169,7 @@ export default function MonitoringPage() {
     }
 
     // Подключение к WebSocket
-    const ws = new WebSocket('ws://localhost:2113');
+    const ws = new WebSocket('ws://localhost:2114/ws');
     setSocket(ws);
 
     ws.onmessage = (event) => {

@@ -9,3 +9,4 @@ COPY . .
 RUN go build -o /usr/local/bin/app ./cmd/main.go
 
 CMD ["app"]
+EXPOSE 2114
